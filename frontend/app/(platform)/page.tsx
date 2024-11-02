@@ -14,7 +14,7 @@ const page = () => {
           <Expand className=" stroke-[0.8]" />
         </div>
       </div>
-      <div className="w-full h-full bg-black rounded-tl-lg"> </div>
+      <div className="w-full h-full bg-black rounded-tl-lg"></div>
     </div>
   );
 };
