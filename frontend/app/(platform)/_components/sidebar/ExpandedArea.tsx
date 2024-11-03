@@ -1,11 +1,12 @@
-// app/(platform)/(main)/_components/ExpandedArea.tsx
+// app/(platform)/_components/sidebar/ExpandedArea.tsx
 import React from "react";
-import { Eye, EyeOff, RotateCcw } from "lucide-react";
+import { Eye, EyeOff, RotateCcw, Download } from "lucide-react";
 import useGraphStore from "@/stores/graphStore";
 
 const ExpandedArea = () => {
   const {
     visibleNodes,
+    currentLinks,
     hideNode,
     hideArticles,
     toggleHideArticles,
@@ -13,6 +14,70 @@ const ExpandedArea = () => {
   } = useGraphStore();
 
   const sortedNodes = [...visibleNodes].sort((a, b) => b.value - a.value);
+
+  const exportToNeo4j = () => {
+    let cypherQueries = "";
+
+    // Create nodes first
+    const eventNodes = visibleNodes.filter((node) => node.type === "event");
+    const articleNodes = visibleNodes.filter((node) => node.type === "article");
+
+    // Export events
+    eventNodes.forEach((node) => {
+      cypherQueries += `CREATE (e${node.id}:Event {
+  id: ${node.id},
+  name: "${node.name.replace(/"/g, '\\"')}",
+  value: ${node.value},
+  startDate: "${node.startDate}"
+})\n`;
+    });
+
+    // Export articles
+    articleNodes.forEach((node) => {
+      cypherQueries += `CREATE (a${node.id}:Article {
+  id: ${node.id},
+  name: "${node.name.replace(/"/g, '\\"')}",
+  value: ${node.value},
+  startDate: "${node.startDate}"
+})\n`;
+    });
+
+    // Get all visible links
+    const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
+    const visibleLinks = currentLinks.filter(
+      (link) =>
+        visibleNodeIds.has(link.source) && visibleNodeIds.has(link.target)
+    );
+
+    // Export relationships
+    visibleLinks.forEach((link) => {
+      const sourceNode = visibleNodes.find((n) => n.id === link.source);
+      const targetNode = visibleNodes.find((n) => n.id === link.target);
+
+      if (sourceNode && targetNode) {
+        const sourcePrefix = sourceNode.type === "event" ? "e" : "a";
+        const targetPrefix = targetNode.type === "event" ? "e" : "a";
+
+        cypherQueries += `CREATE (${sourcePrefix}${link.source})-[:RELATES_TO {
+  value: ${link.value},
+  startDate: "${link.startDate}"
+}]->(${targetPrefix}${link.target})\n`;
+      }
+    });
+
+    // Create and download the file
+    const blob = new Blob([cypherQueries], { type: "text/plain" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `graph_export_${
+      new Date().toISOString().split("T")[0]
+    }.cypher`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -33,6 +98,18 @@ const ExpandedArea = () => {
           <span className="text-xs text-zinc-700">
             {hideArticles ? "Show Articles" : "Hide Articles"}
           </span>
+        </button>
+      </div>
+
+      {/* Export button */}
+      <div className="w-full h-11 px-3 flex items-center justify-between border-b border-zinc-200 bg-zinc-50">
+        <span className="text-xs text-zinc-500">Export current graph</span>
+        <button
+          onClick={exportToNeo4j}
+          className="flex items-center space-x-1 px-2 py-1 rounded-md bg-zinc-200 hover:bg-zinc-300 transition-colors"
+        >
+          <Download className="w-3.5 h-3.5 text-zinc-700" />
+          <span className="text-xs text-zinc-700">Export Neo4j</span>
         </button>
       </div>
 

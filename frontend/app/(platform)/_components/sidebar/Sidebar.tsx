@@ -61,9 +61,6 @@ const Sidebar: React.FC = () => {
           width: isExpanded ? "12vw" : "0px",
           opacity: isExpanded ? 1 : 0,
           overflow: isExpanded ? "visible" : "hidden",
-          borderRightColor: isExpanded
-            ? "rgba(17, 24, 39, 1)"
-            : "rgba(17, 24, 39, 0)",
         }}
         transition={{
           width: { type: "spring", stiffness: 300, damping: 30 },
