@@ -25,3 +25,10 @@ export const sentimentData = [
   { date: "2024-12-01", value: 0.7 },
   { date: "2024-12-15", value: -0.4 },
 ];
+
+// import axios from 'axios';
+
+// export async function fetchRedditData() {
+//   // const response = await axios.get('http://localhost:8000/reddit');
+//   // return response.data;
+// }

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronsUpDown, X } from "lucide-react";
+import { ChartLine, ChevronsUpDown, X } from "lucide-react";
 import ForceGraph from "./_components/ForceGraph";
 import { getGraphStateAtDate } from "./data";
 import useGraphStore from "@/stores/graphStore";
@@ -15,7 +15,6 @@ const Page = () => {
   const [currentGraphData, setCurrentGraphData] = useState(() =>
     getGraphStateAtDate("2024-01-01")
   );
-
 
   const sliderRef = useRef(null);
   const { sliderPosition, setSliderPosition, isAnimating } = useGraphStore();
@@ -107,8 +106,10 @@ const Page = () => {
         {/* Clickable sentiment button */}
         <button
           onClick={() => setShowSentiment(!showSentiment)}
-          className="w-8 h-8 rounded absolute top-2 right-2 bg-zinc-300 border border-zinc-500 hover:bg-zinc-200 transition-colors duration-200"
-        />
+          className="w-8 h-8 rounded absolute top-2 right-2 bg-zinc-300 border border-zinc-500 hover:bg-zinc-200 transition-colors duration-200 flex justify-center items-center"
+        >
+          <ChartLine className="h-5 w-5 stroke-[0.8]" />
+        </button>
 
         {/* Sentiment Analysis Popup */}
         {showSentiment && (
