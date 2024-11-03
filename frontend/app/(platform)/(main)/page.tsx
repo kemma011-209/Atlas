@@ -1,17 +1,20 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import ForceGraph from "./_components/ForceGraph";
-import { graphData } from "./data";
 import { ChevronsUpDown } from "lucide-react";
+import ForceGraph from "./_components/ForceGraph";
+import { temporalGraphData, getGraphStateAtDate } from "./data";
 
 const Page = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(2022);
+  const [selectedYear, setSelectedYear] = useState(2024);
   const [sliderPosition, setSliderPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [currentGraphData, setCurrentGraphData] = useState(() =>
+    getGraphStateAtDate("2024-01-01")
+  );
   const sliderRef = useRef(null);
 
-  const years = [2022, 2023, 2024];
+  const years = [2024]; // Since we're focusing on 2024
   const months = [
     "Jan",
     "Feb",
@@ -38,7 +41,13 @@ const Page = () => {
       month++;
     }
 
-    return `${months[month]}, ${days}`;
+    return {
+      display: `${months[month]}, ${days}`,
+      iso: `2024-${String(month + 1).padStart(2, "0")}-${String(days).padStart(
+        2,
+        "0"
+      )}`,
+    };
   };
 
   const handleMouseDown = (e) => {
@@ -66,6 +75,13 @@ const Page = () => {
     }
   };
 
+  // Update graph data when slider position changes
+  useEffect(() => {
+    const date = calculateDate(sliderPosition);
+    const newGraphData = getGraphStateAtDate(date.iso);
+    setCurrentGraphData(newGraphData);
+  }, [sliderPosition]);
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -78,10 +94,9 @@ const Page = () => {
   }, [isDragging]);
 
   return (
-    <div className="w-screen h-screen flex flex-col">
-      <div className="w-full flex-grow bg-zinc-900 relative overflow-hidden">
-        <div className="w-48 h-80 bg-white rounded top-8 right-2 absolute z-10"></div>
-        <ForceGraph graphData={graphData} />
+    <div className="w-full h-full flex flex-col rounded-tl-2xl">
+      <div className="w-full flex-grow bg-zinc-900 rounded-tl-2xl relative overflow-hidden">
+        <ForceGraph graphData={currentGraphData} />
       </div>
       <div className="w-full h-14 bg-zinc-700 border-t border-zinc-600 flex-shrink-0">
         <div className="w-full h-full flex">
@@ -157,7 +172,7 @@ const Page = () => {
               >
                 {/* Date tooltip */}
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-zinc-800 text-zinc-100 text-xs px-2 py-1 rounded whitespace-nowrap">
-                  {calculateDate(sliderPosition)}
+                  {calculateDate(sliderPosition).display}
                 </div>
                 {/* Pin design */}
                 <div className="flex flex-col items-center">

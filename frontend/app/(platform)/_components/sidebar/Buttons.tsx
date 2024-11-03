@@ -1,19 +1,10 @@
 import React from "react";
-import {
-  ArrowRightFromLine,
-  Castle,
-  CircleUserRound,
-  DraftingCompass,
-  FileStack,
-  History,
-  Plus,
-  Settings,
-  SlidersHorizontal,
-  Type,
-  X,
-} from "lucide-react";
+import { DraftingCompass, Share2 } from "lucide-react";
+import useGraphStore from "@/stores/graphStore";
 
 const Buttons = () => {
+  const setGoesTrue = useGraphStore((state) => state.setGoesTrue);
+
   return (
     <div className="w-full h-full flex justify-between flex-col">
       {/* Top Buttons */}
@@ -26,10 +17,15 @@ const Buttons = () => {
             <DraftingCompass className="w-full h-full stroke-[0.8] text-blue-950 text-opacity-45" />
           </div>
         </div>
-
-        {/* SlidersHorizontal Icon */}
+        {/* Share2 Icon */}
         <div className="w-full aspect-square flex justify-center items-center p-2 group hover:bg-blue-950 transition duration-200">
-          <SlidersHorizontal className="w-full h-full stroke-[0.8] text-blue-950 fill-blue-950 group-hover:text-white group-hover:fill-white transition duration-200" />
+          <Share2
+            className="w-full h-full stroke-[0.8] text-blue-950 fill-blue-950 group-hover:text-white group-hover:fill-white transition duration-200"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent event from bubbling up
+              setGoesTrue();
+            }}
+          />
         </div>
       </div>
     </div>

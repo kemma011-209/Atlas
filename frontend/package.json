@@ -12,6 +12,7 @@
     "d3": "^7.9.0",
     "framer-motion": "^11.11.11",
     "lucide-react": "^0.454.0",
+    "neo4j-driver": "^5.26.0",
     "next": "15.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

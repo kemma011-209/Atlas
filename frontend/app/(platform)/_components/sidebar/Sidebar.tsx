@@ -5,6 +5,7 @@ import { ArrowRightFromLine, Castle, Earth } from "lucide-react";
 import { useSidebarStore } from "@/stores/sidebarStore";
 import Buttons from "./Buttons";
 import { usePathname } from "next/navigation";
+import ExpandedArea from "./ExpandedArea";
 
 const Sidebar: React.FC = () => {
   const isExpanded = useSidebarStore((state) => state.isExpanded);
@@ -54,15 +55,12 @@ const Sidebar: React.FC = () => {
       {/* Expandable Div */}
       <motion.div
         id="expandable-sidebar"
-        className="h-full bg-stone-200"
+        className="h-full bg-zinc-100"
         initial={false}
         animate={{
           width: isExpanded ? "12vw" : "0px",
           opacity: isExpanded ? 1 : 0,
           overflow: isExpanded ? "visible" : "hidden",
-          borderLeftColor: isExpanded
-            ? "rgba(17, 24, 39, 1)"
-            : "rgba(17, 24, 39, 0)",
           borderRightColor: isExpanded
             ? "rgba(17, 24, 39, 1)"
             : "rgba(17, 24, 39, 0)",
@@ -81,8 +79,8 @@ const Sidebar: React.FC = () => {
         }}
       >
         {isExpanded && (
-          <div className="w-full h-full pt-10">
-            {/* The Expanded Div content goes here */}
+          <div className="w-full h-full ">
+            <ExpandedArea />
           </div>
         )}
       </motion.div>
