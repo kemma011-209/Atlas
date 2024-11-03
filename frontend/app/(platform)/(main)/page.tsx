@@ -1,17 +1,21 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, X } from "lucide-react";
 import ForceGraph from "./_components/ForceGraph";
 import { getGraphStateAtDate } from "./data";
 import useGraphStore from "@/stores/graphStore";
+import { LineChart, Line, XAxis, YAxis } from "recharts";
+import { sentimentData } from "./semantics";
 
 const Page = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(2024);
   const [isDragging, setIsDragging] = useState(false);
+  const [showSentiment, setShowSentiment] = useState(false);
   const [currentGraphData, setCurrentGraphData] = useState(() =>
     getGraphStateAtDate("2024-01-01")
   );
+
 
   const sliderRef = useRef(null);
   const { sliderPosition, setSliderPosition, isAnimating } = useGraphStore();
@@ -53,7 +57,7 @@ const Page = () => {
   };
 
   const handleMouseDown = (e) => {
-    if (isAnimating) return; // Prevent slider movement during animation
+    if (isAnimating) return;
     setIsDragging(true);
     updateSliderPosition(e);
   };
@@ -99,8 +103,49 @@ const Page = () => {
     <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex-grow bg-zinc-900 relative overflow-hidden rounded-tl-2xl">
         <ForceGraph graphData={currentGraphData} />
-        {/*The Tremor Graph will go here*/}
+
+        {/* Clickable sentiment button */}
+        <button
+          onClick={() => setShowSentiment(!showSentiment)}
+          className="w-8 h-8 rounded absolute top-2 right-2 bg-zinc-300 border border-zinc-500 hover:bg-zinc-200 transition-colors duration-200"
+        />
+
+        {/* Sentiment Analysis Popup */}
+        {showSentiment && (
+          <div className="absolute top-12 right-2 w-[35rem] h-64 bg-zinc-800 rounded-lg border border-zinc-600 p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-zinc-100 font-medium">Sentiment Analysis</h3>
+              <button
+                onClick={() => setShowSentiment(false)}
+                className="text-zinc-400 hover:text-zinc-200"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="w-full h-48">
+              <LineChart
+                width={500}
+                height={180}
+                data={sentimentData.filter((d) => {
+                  const date = calculateDate(sliderPosition).iso;
+                  return d.date <= date.substring(0, 7);
+                })}
+              >
+                <XAxis dataKey="date" />
+                <YAxis domain={[-1, 1]} />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3b82f6"
+                  dot={false}
+                />
+              </LineChart>
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="w-full h-14 bg-zinc-700 border-t border-zinc-600 flex-shrink-0 flex relative">
         <div className="h-full w-24 p-2 border-r border-zinc-400 flex space-x-2 relative">
           <button
