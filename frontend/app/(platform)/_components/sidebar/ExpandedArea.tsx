@@ -1,52 +1,74 @@
 // app/(platform)/(main)/_components/ExpandedArea.tsx
 import React from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, RotateCcw } from "lucide-react";
 import useGraphStore from "@/stores/graphStore";
 
 const ExpandedArea = () => {
-  const { visibleNodes, hideNode, hideArticles, toggleHideArticles } =
-    useGraphStore();
+  const {
+    visibleNodes,
+    hideNode,
+    hideArticles,
+    toggleHideArticles,
+    resetVisibility,
+  } = useGraphStore();
 
   const sortedNodes = [...visibleNodes].sort((a, b) => b.value - a.value);
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="w-full h-11 border-b border-zinc-500 flex items-center justify-between px-4">
-        <div className="text-sm text-zinc-300">
-          Visible Events ({sortedNodes.length})
-        </div>
+      {/* Header with article toggle */}
+      <div className="w-full h-11 px-3 flex items-center justify-between border-b border-zinc-200">
+        <span className="text-sm font-medium text-zinc-700">
+          Visible Nodes ({sortedNodes.length})
+        </span>
         <button
           onClick={toggleHideArticles}
-          className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors"
+          className="flex items-center space-x-1 px-2 py-1 rounded-md bg-zinc-200 hover:bg-zinc-300 transition-colors"
         >
           {hideArticles ? (
-            <Eye className="w-4 h-4 text-zinc-300" />
+            <Eye className="w-3.5 h-3.5 text-zinc-700" />
           ) : (
-            <EyeOff className="w-4 h-4 text-zinc-300" />
+            <EyeOff className="w-3.5 h-3.5 text-zinc-700" />
           )}
-          <span className="text-sm text-zinc-300">
+          <span className="text-xs text-zinc-700">
             {hideArticles ? "Show Articles" : "Hide Articles"}
           </span>
         </button>
       </div>
+
+      {/* Reset visibility button */}
+      <div className="w-full h-11 px-3 flex items-center justify-between border-b border-zinc-200 bg-zinc-50">
+        <span className="text-xs text-zinc-500">Reset graph visibility</span>
+        <button
+          onClick={resetVisibility}
+          className="flex items-center space-x-1 px-2 py-1 rounded-md bg-zinc-200 hover:bg-zinc-300 transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-zinc-700" />
+          <span className="text-xs text-zinc-700">Show All</span>
+        </button>
+      </div>
+
+      {/* Node list */}
       <div className="flex-grow overflow-y-auto">
-        <div className="p-4 space-y-2">
+        <div className="p-2 space-y-1.5">
           {sortedNodes.map((node) => (
             <div
               key={node.id}
-              className="flex items-center justify-between p-3 bg-zinc-800 rounded-md"
+              className="flex items-center justify-between p-2 bg-white rounded-md shadow-sm"
             >
-              <div className="flex flex-col">
-                <span className="text-sm text-zinc-200">{node.name}</span>
-                <span className="text-xs text-zinc-400">
+              <div className="flex flex-col mr-2 min-w-0">
+                <span className="text-xs font-medium text-zinc-700 truncate">
+                  {node.name}
+                </span>
+                <span className="text-[10px] text-zinc-500">
                   {node.type.charAt(0).toUpperCase() + node.type.slice(1)}
                 </span>
               </div>
               <button
                 onClick={() => hideNode(node.id)}
-                className="p-1 hover:bg-zinc-700 rounded transition-colors"
+                className="p-1 hover:bg-zinc-100 rounded transition-colors flex-shrink-0"
               >
-                <EyeOff className="w-4 h-4 text-zinc-400" />
+                <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
               </button>
             </div>
           ))}

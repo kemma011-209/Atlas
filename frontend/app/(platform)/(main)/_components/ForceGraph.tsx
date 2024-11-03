@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { X } from "lucide-react";
 import useGraphStore from "@/stores/graphStore";
-import { TemporalNode, TemporalLink } from "../data";
+import type { TemporalNode, TemporalLink } from "../data";
 
 interface ForceGraphProps {
   graphData: {
@@ -18,25 +18,97 @@ const ForceGraph = ({ graphData }: ForceGraphProps) => {
     useGraphStore();
   const svgRef = useRef(null);
 
-  // Filter nodes based on hideArticles and hiddenNodes
-  const filteredData = {
-    nodes: graphData.nodes.filter(
-      (node) =>
-        !hiddenNodes.has(node.id) && !(hideArticles && node.type === "article")
-    ),
-    links: graphData.links.filter((link) => {
-      const sourceNode = graphData.nodes.find((n) => n.id === link.source);
-      const targetNode = graphData.nodes.find((n) => n.id === link.target);
-      return (
-        !hiddenNodes.has(link.source) &&
-        !hiddenNodes.has(link.target) &&
-        !(
-          hideArticles &&
-          (sourceNode?.type === "article" || targetNode?.type === "article")
-        )
+  // Filter nodes based on hideArticles and hiddenNodes with cascade effect
+  const filteredData = React.useMemo(() => {
+    // Helper function to get all connected nodes for a given node
+    const getConnectedNodes = (
+      nodeId: number,
+      links: TemporalLink[]
+    ): Set<number> => {
+      const connected = new Set<number>();
+      links.forEach((link) => {
+        if (
+          link.source === nodeId ||
+          (typeof link.source === "object" && link.source.id === nodeId)
+        ) {
+          connected.add(
+            typeof link.target === "number" ? link.target : link.target.id
+          );
+        }
+        if (
+          link.target === nodeId ||
+          (typeof link.target === "object" && link.target.id === nodeId)
+        ) {
+          connected.add(
+            typeof link.source === "number" ? link.source : link.source.id
+          );
+        }
+      });
+      return connected;
+    };
+
+    // Initial node filtering based on explicit hide conditions
+    let nodesToHide = new Set(hiddenNodes);
+    if (hideArticles) {
+      graphData.nodes
+        .filter((node) => node.type === "article")
+        .forEach((node) => nodesToHide.add(node.id));
+    }
+
+    // Keep track of nodes that should remain visible
+    let visibleNodes = new Set<number>();
+    let hasChanges = true;
+
+    // Iteratively filter nodes until no more changes occur
+    while (hasChanges) {
+      hasChanges = false;
+
+      // Start with all nodes that aren't explicitly hidden
+      const currentVisible = new Set<number>(
+        graphData.nodes
+          .filter((node) => !nodesToHide.has(node.id))
+          .map((node) => node.id)
       );
-    }),
-  };
+
+      // For each potentially visible node
+      for (const nodeId of currentVisible) {
+        const connectedNodes = getConnectedNodes(nodeId, graphData.links);
+        const hasVisibleConnections = Array.from(connectedNodes).some(
+          (connectedId) => !nodesToHide.has(connectedId)
+        );
+
+        // If a node has no visible connections (except for initial events)
+        const node = graphData.nodes.find((n) => n.id === nodeId);
+        if (!hasVisibleConnections && node?.type === "article") {
+          if (!nodesToHide.has(nodeId)) {
+            nodesToHide.add(nodeId);
+            hasChanges = true;
+          }
+        } else if (hasVisibleConnections || node?.type === "event") {
+          visibleNodes.add(nodeId);
+        }
+      }
+    }
+
+    // Filter nodes
+    const filteredNodes = graphData.nodes.filter(
+      (node) => !nodesToHide.has(node.id)
+    );
+
+    // Filter links - only keep links between visible nodes
+    const filteredLinks = graphData.links.filter((link) => {
+      const sourceId =
+        typeof link.source === "number" ? link.source : link.source.id;
+      const targetId =
+        typeof link.target === "number" ? link.target : link.target.id;
+      return !nodesToHide.has(sourceId) && !nodesToHide.has(targetId);
+    });
+
+    return {
+      nodes: filteredNodes,
+      links: filteredLinks,
+    };
+  }, [graphData, hideArticles, hiddenNodes]);
 
   // Update visible nodes in store
   useEffect(() => {
@@ -77,7 +149,6 @@ const ForceGraph = ({ graphData }: ForceGraphProps) => {
       .select(svgRef.current)
       .attr("width", width)
       .attr("height", height);
-
     // Define markers for streaming effect
     const defs = svg.append("defs");
 

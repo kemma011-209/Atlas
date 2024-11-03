@@ -1,6 +1,7 @@
-// app/(platform)/(main)/_components/store/graph-store.ts
+// stores/graphStore.ts
 import { create } from "zustand";
 import type { TemporalNode } from "@/app/(platform)/(main)/data";
+
 interface GraphStoreState {
   goesTrue: boolean;
   setGoesTrue: () => void;
@@ -9,8 +10,13 @@ interface GraphStoreState {
   hiddenNodes: Set<number>;
   hideNode: (nodeId: number) => void;
   showNode: (nodeId: number) => void;
+  resetVisibility: () => void;
   visibleNodes: TemporalNode[];
   setVisibleNodes: (nodes: TemporalNode[]) => void;
+  sliderPosition: number;
+  setSliderPosition: (position: number) => void;
+  isAnimating: boolean;
+  setIsAnimating: (isAnimating: boolean) => void;
 }
 
 const useGraphStore = create<GraphStoreState>((set, get) => ({
@@ -32,14 +38,22 @@ const useGraphStore = create<GraphStoreState>((set, get) => ({
       newHiddenNodes.delete(nodeId);
       return { hiddenNodes: newHiddenNodes };
     }),
+  resetVisibility: () =>
+    set({
+      hiddenNodes: new Set(),
+      hideArticles: false,
+    }),
   visibleNodes: [],
   setVisibleNodes: (nodes: TemporalNode[]) => {
     const currentNodes = get().visibleNodes;
-    // Only update if the nodes have actually changed
     if (JSON.stringify(nodes) !== JSON.stringify(currentNodes)) {
       set({ visibleNodes: nodes });
     }
   },
+  sliderPosition: 0,
+  setSliderPosition: (position: number) => set({ sliderPosition: position }),
+  isAnimating: false,
+  setIsAnimating: (isAnimating: boolean) => set({ isAnimating: isAnimating }),
 }));
 
 export default useGraphStore;
