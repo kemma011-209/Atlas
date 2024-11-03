@@ -4,7 +4,7 @@ import { DraftingCompass, Share2 } from "lucide-react";
 import useGraphStore from "@/stores/graphStore";
 
 const Buttons = () => {
-  const { setGoesTrue, setCurrentDate, isAnimating, setIsAnimating } =
+  const { setGoesTrue, setSliderPosition, isAnimating, setIsAnimating } =
     useGraphStore();
 
   const startAnimation = () => {
@@ -28,14 +28,11 @@ const Buttons = () => {
         // Cubic easing for smoother progression
         const easedProgress = 1 - Math.pow(1 - progress, 3);
 
-        // Calculate the current date based on progress
-        const currentDay = Math.floor(easedProgress * 365);
-        const date = new Date(2024, 0, 1);
-        date.setDate(date.getDate() + currentDay);
+        // Calculate the new slider position based on eased progress
+        const newSliderPosition = easedProgress * 100;
 
-        // Format the date as ISO string and set it in the store
-        const isoDate = date.toISOString().split("T")[0];
-        setCurrentDate(isoDate);
+        // Update the slider position in the store
+        setSliderPosition(newSliderPosition);
 
         lastUpdateTime = currentTime;
       }

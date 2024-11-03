@@ -1,8 +1,8 @@
 import neo4j from "neo4j-driver";
 
-const uri = "neo4j+s://0ba295f2.databases.neo4j.io";
-const user = "neo4j";
-const password = "MHMIawfVshXzx3sl4OnLFgc9BZ0p4tXI3AXijjGK6K0";
+const uri = process.env.NEO4J_URI;
+const user = process.env.NEO4J_USER;
+const password = process.env.NEO4J_PASSWORD;
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 

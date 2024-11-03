@@ -99,7 +99,7 @@ const Page = () => {
     <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex-grow bg-zinc-900 relative overflow-hidden rounded-tl-2xl">
         <ForceGraph graphData={currentGraphData} />
-        <div className="w-64 h-96 rounded-xl absolute top-8 right-4 bg-white"></div>
+        {/*The Tremor Graph will go here*/}
       </div>
       <div className="w-full h-14 bg-zinc-700 border-t border-zinc-600 flex-shrink-0 flex relative">
         <div className="h-full w-24 p-2 border-r border-zinc-400 flex space-x-2 relative">
